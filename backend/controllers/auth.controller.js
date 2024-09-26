@@ -41,7 +41,7 @@ export const signup = async(req, res) => {
       const token =  generatedTokenAndSetCookie(newUser._id,res)
         await newUser.save();
 
-        res.status(201).cookies(token).json({
+        res.status(201).cookie(token).json({
             _id: newUser._id,
             fullName: newUser.fullName,
             username: newUser.username,
@@ -68,17 +68,18 @@ export const login = async (req, res) => {
     const {username,password } = req.body;
     const user = await User.findOne({username});
     console.log(user)  //data extracted
-    const isPasswordCorrect = await bcrypt.compare(password,user?.password || "")
-    console.log(isPasswordCorrect)
+    console.log("hello1")
+    const isPasswordCorrect = await bcrypt.compare(password, user?.password || "")
+    console.log("hello2")
     
     if(!user || !isPasswordCorrect){
         return res.status(400).json({error:"invalid username or password "}) 
     }
-    console.log(user._id)
-    console.log("hello 0");
+   
+    
 
     const token = generatedTokenAndSetCookie(user._id, res);
-    console.log("hello 1");
+    
 
     
 
@@ -103,7 +104,7 @@ export const login = async (req, res) => {
         profileImg: user.profileImg,
         coverImg: user.coverImg,
     });
-    console.log("hello 2")
+    
 
     } catch (error) {
         console.log("Error in login controller", error.message);
