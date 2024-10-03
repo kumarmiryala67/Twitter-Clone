@@ -3,10 +3,10 @@
 
  import authRoutes from "./routes/auth.routes.js";
  import userRoutes from "./routes/user.routes.js";
+ import postRoutes from "./routes/post.routes.js";
  import connectmongoDB from "./db/connectMongoDB.js";
  import cookieParser from "cookie-parser";
  import {v2 as cloudinary} from "cloudinary";
- 
  
  dotenv.config();
 
@@ -26,6 +26,7 @@
 
   app.use("/api/auth", authRoutes); 
   app.use("/api/users",userRoutes); 
+  app.use("/api/posts",postRoutes); 
   
 
 

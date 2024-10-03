@@ -78,7 +78,7 @@ export const login = async (req, res) => {
    
     
 
-    const token = generatedTokenAndSetCookie(user._id, res);
+    const token = generatedTokenAndSetCookie(user._id);
     
 
     
