@@ -5,7 +5,7 @@ import { generatedTokenAndSetCookie } from "../lib/utils/generatedToken.js";
 export const signup = async(req, res) => {
  try {
     const {fullName, username, email, password} = req.body;
-
+    console.log(fullName)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         return res.status(400).json({ error: "invalid email format"});
@@ -67,10 +67,10 @@ export const login = async (req, res) => {
         
     const {username,password } = req.body;
     const user = await User.findOne({username});
-    console.log(user)  //data extracted
-    console.log("hello1")
+    console.log(username)  //data extracted
+    
     const isPasswordCorrect = await bcrypt.compare(password, user?.password || "")
-    console.log("hello2")
+    
     
     if(!user || !isPasswordCorrect){
         return res.status(400).json({error:"invalid username or password "}) 
