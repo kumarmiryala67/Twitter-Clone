@@ -1,23 +1,55 @@
 import { FaRegComment } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
-import { FaRegHeart } from "react-icons/fa";
-import { FaRegBookmark } from "react-icons/fa6";
-import { FaTrash } from "react-icons/fa";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { FaRegHeart } from "react-icons/fa"; 
+import { FaRegBookmark } from "react-icons/fa6"; 
+import { FaTrash } from "react-icons/fa";  
+import { useState } from "react"; 
+import { Link } from "react-router-dom"; 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"; 
+import { toast } from "react-hot-toast"; 
 
-const Post = ({ post }) => {
-	const [comment, setComment] = useState("");
+import LoadingSpinner from "./LoadingSpinner";  
+
+const Post = ({ post }) => {            
+	const [comment, setComment] = useState(""); 
+	const {data: authUser } = useQuery({ queryKey: ["authUser"] });
+	const queryClient = useQueryClient();
+
+	const {mutate: deletePost, isPending} = useMutation({   
+		mutationFn: async () => {   
+			try { 
+				const res = await fetch(`/api/posts/${post._id}`,{ 
+					method: "DELETE", 
+				}); 
+				const data = await res.json(); 
+
+				if(!res.ok){
+					throw new Error(data.error || "Something went wrong");
+				}
+				return data; 
+			} catch (error) { 
+				throw new Error(error);
+			} 
+		}, 
+		onSuccess: () => {  
+			toast.success("Post deleted successfully"); 
+			// invalidate the query to refetch the data
+			queryClient.invalidateQueries( {queryKey: ["posts"]})
+		},
+	})
+
 	const postOwner = post.user;
 	const isLiked = false;
 
-	const isMyPost = true;
+	const isMyPost = authUser._id === post.user._id;
 
 	const formattedDate = "1h";
 
 	const isCommenting = false;
 
-	const handleDeletePost = () => {};
+	const handleDeletePost = () => {
+		deletePost();
+	};
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
@@ -28,40 +60,47 @@ const Post = ({ post }) => {
 	return (
 		<>
 			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
-				<div className='avatar'>
-					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'>
+				<div className='avatar'> 
+					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'> 
 						<img src={postOwner.profileImg || "/avatar-placeholder.png"} />
 					</Link>
 				</div>
 				<div className='flex flex-col flex-1'>
-					<div className='flex gap-2 items-center'>
-						<Link to={`/profile/${postOwner.username}`} className='font-bold'>
-							{postOwner.fullName}
-						</Link>
-						<span className='text-gray-700 flex gap-1 text-sm'>
-							<Link to={`/profile/${postOwner.username}`}>@{postOwner.username}</Link>
-							<span>·</span>
-							<span>{formattedDate}</span>
-						</span>
-						{isMyPost && (
-							<span className='flex justify-end flex-1'>
-								<FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />
+					<div className='flex gap-2 items-center'> 
+						<Link to={`/profile/${postOwner.username}`} className='font-bold'> 
+							{postOwner.fullName} 
+						</Link> 
+						<span className='text-gray-700 flex gap-1 text-sm'> 
+							<Link to={`/profile/${postOwner.username}`}>@{postOwner.username}</Link> 
+							<span>·</span> 
+							<span>{formattedDate}</span> 
+						</span> 
+						{isMyPost && ( 
+							<span className='flex justify-end flex-1'> 
+								{!isPending && ( 
+								<FaTrash className='cursor-pointer hover:text-red-500' onClick=
+								{handleDeletePost} /> 
+							)} 
+
+								{isPending && ( 
+									<LoadingSpinner size="sm"/> 
+								)} 
 							</span>
+						)} 
+					</div> 
+					<div className='flex flex-col gap-3 overflow-hidden'> 
+						<span>{post.text}</span>  
+						{post.img && ( 
+							<img 
+								src={post.img} 
+								className='h-80 object-contain rounded-lg border border-gray-700' 
+								alt='' 
+							/> 
 						)}
-					</div>
-					<div className='flex flex-col gap-3 overflow-hidden'>
-						<span>{post.text}</span>
-						{post.img && (
-							<img
-								src={post.img}
-								className='h-80 object-contain rounded-lg border border-gray-700'
-								alt=''
-							/>
-						)}
-					</div>
-					<div className='flex justify-between mt-3'>
-						<div className='flex gap-4 items-center w-2/3 justify-between'>
-							<div
+					</div> 
+					<div className='flex justify-between mt-3'> 
+						<div className='flex gap-4 items-center w-2/3 justify-between'> 
+							<div 
 								className='flex gap-1 items-center cursor-pointer group'
 								onClick={() => document.getElementById("comments_modal" + post._id).showModal()}
 							>
