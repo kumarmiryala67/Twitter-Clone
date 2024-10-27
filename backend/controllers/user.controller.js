@@ -5,22 +5,20 @@
  import User from "../models/user.model.js"; 
  import Notification from "../models/notification.model.js";
 
+export const getUserProfile = async (req, res) => {
+	const { username } = req.params;
 
-  export const getUserProfile = async (req, res) => {
-   const {username} = req.params;
-   try {
-    const user = await User.findOne({username}).select("-password");
-     if (!user) {
-        return res.status(404).json({message: "User not found"});
-     }
-    res.status(200).json(user);
-   } catch (error) {
-    console.log("Error in getUserProfile:",error.message);
-    res.status(500).json({error:error.message});
-    
-   }  
-};
- 
+	try {
+		const user = await User.findOne({ username }).select("-password");
+		if (!user) return res.status(404).json({ message: "User not found" });
+
+		res.status(200).json(user);
+	} catch (error) {
+		console.log("Error in getUserProfile: ", error.message);
+		res.status(500).json({ error: error.message });
+	}
+}; 
+
 export const followUnfollowUser = async (req, res) => {
    try {
     const { id } = req.params;
@@ -65,35 +63,33 @@ export const followUnfollowUser = async (req, res) => {
    } 
 };
      
- export const getSuggestedUsers = async(req, res) => {
+export const getSuggestedUsers = async (req, res) => {
+	try {
+		const userId = req.user._id;
 
-    
-    try { 
-       const userId = req.user._id;
+		const usersFollowedByMe = await User.findById(userId).select("following");
 
-        const usersFollowedByMe = await User.findById(userId).select("following");
-    
-        const users = await User.aggregate([
-            
-            {
-                $match:{
-                    _id: {$ne:userId}
-                }
-            },
-            {$sample:{size:10}}
-        ])
-        
-        const filteredUsers =users.filter(user=>!usersFollowedByMe.following.includes(user._id))
-        const SuggestedUsers = filteredUsers.slice(0,4)
+		const users = await User.aggregate([
+			{
+				$match: {
+					_id: { $ne: userId },
+				},
+			},
+			{ $sample: { size: 10 } },
+		]);
 
-        SuggestedUsers.forEach(user=>user.password = null)
+		// 1,2,3,4,5,6,
+		const filteredUsers = users.filter((user) => !usersFollowedByMe.following.includes(user._id));
+		const suggestedUsers = filteredUsers.slice(0, 4);
 
-        res.status(200).json(SuggestedUsers)
-    } catch (error) {
-       console.log(" in getSuggestedUsers: ", error.message); 
-       res.status(500).json( {error: error.message });
-    };
-}
+		suggestedUsers.forEach((user) => (user.password = null));
+
+		res.status(200).json(suggestedUsers);
+	} catch (error) {
+		console.log("Error in getSuggestedUsers: ", error.message);
+		res.status(500).json({ error: error.message });
+	}
+};
 
  export const updateUser = async (req, res) => {
     const { fullName, email,username,currentPassword,newPassword,bio,link} = req.body;
