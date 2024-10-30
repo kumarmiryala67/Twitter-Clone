@@ -49,7 +49,7 @@ const RightPanel = () => {
 								<div className='flex gap-2 items-center'>
 									<div className='avatar'>
 										<div className='w-8 rounded-full'>
-											<img src={user.profileImg || "/avatar-placeholder.png"} />
+											<img src={user.profileImg || "https://as2.ftcdn.net/v2/jpg/03/16/12/51/1000_F_316125188_FYs3RbaUQ6gGwom3sfqSvgt2QGw3fKol.jpg"} />
 										</div>
 									</div>
 									<div className='flex flex-col'>
