@@ -32,7 +32,7 @@ const LoginPage = () => {
 				throw new Error(data.meassge || "Something went wrong");
 			}
 		} catch (error) {
-			throw new Error("error in catch ");
+			throw new Error(error.message );
 		}
 	},
 	 onSuccess: () => { 
